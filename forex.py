@@ -4,42 +4,40 @@ import time
 from flask import Flask
 from threading import Thread
 
-# Force Python to show logs immediately
 def log(msg):
     print(f"DEBUG: {msg}", flush=True)
-    sys.stdout.flush()
 
 app = Flask(__name__)
 @app.route('/')
-def home(): return "Debug Live"
+def home(): return "Bot Active"
 
-log("--- SCRIPT STARTING ---")
-
-def send_now():
+def send_final_test():
+    # PASTE YOUR BRAND NEW WEBHOOK URL HERE
     url = "https://discord.com/api/webhooks/1491002012119076985/-SpK7iShVnetlkjZXCfrg3gpRDnNvZqlJhy8lf7CWk0SL_HRCsl389QK0ESjiPNK1cCm"
-    log(f"Targeting Webhook: {url[:20]}...")
     
-    payload = {"content": "🚀 **MANUAL OVERRIDE: TESTING CONNECTION**"}
+    # Adding a Header makes Discord think we are a real browser
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+        "Content-Type": "application/json"
+    }
+    
+    payload = {"content": "📢 **FINAL CONNECTION TEST: SUCCESS**"}
     
     try:
-        log("Sending POST request...")
-        r = requests.post(url, json=payload, timeout=15)
-        log(f"STATUS CODE: {r.status_code}")
-        log(f"RESPONSE: {r.text}")
+        log("Sending Request...")
+        r = requests.post(url, json=payload, headers=headers, timeout=15)
+        log(f"Status: {r.status_code}")
+        log(f"Discord Response: {r.text}")
     except Exception as e:
-        log(f"ERROR: {str(e)}")
+        log(f"Connection Error: {e}")
 
-# Start Flask in background
-log("Starting Web Server...")
-Thread(target=lambda: app.run(host='0.0.0.0', port=8080, debug=False, use_reloader=False)).start()
+# Startup
+log("--- STARTING FINAL ATTEMPT ---")
+Thread(target=lambda: app.run(host='0.0.0.0', port=8080)).start()
 
-# Wait 5 seconds for network to stabilize
 time.sleep(5)
-
-# Trigger the message
-send_now()
-
-log("--- BOOT SEQUENCE COMPLETE ---")
+send_final_test()
+log("--- BOOT FINISHED ---")
 
 while True:
     time.sleep(60)
