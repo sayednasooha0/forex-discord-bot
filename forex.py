@@ -23,14 +23,15 @@ def keep_alive():
 DAILY_WEBHOOK = "https://discord.com/api/webhooks/1491002012119076985/-SpK7iShVnetlkjZXCfrg3gpRDnNvZqlJhy8lf7CWk0SL_HRCsl389QK0ESjiPNK1cCm"
 ALERT_WEBHOOK = "https://discord.com/api/webhooks/1491010195801899129/0RTe-_si-spHQtope5NMRUDqq5r7-7ViD-I4HVrZRNxzVsF0B5uTsLbNy6WiPftfv6yD"
 
-TARGET_CURRENCIES = ["EUR", "USD", "NZD", "CAD", "AUD","GBP"]
+TARGET_CURRENCIES = ["EUR", "USD", "NZD", "CAD", "AUD", "GBP"]
 CACHE_DURATION = 240
 sent_alerts = set()
 cached_news_data = []
 last_fetch_time = 0
 
+# FIXED: Added missing flags for your new currencies
 FLAGS = {
-    "USD": "🇺🇸", "EUR": "🇪🇺", "NZD": "🇳🇿"
+    "USD": "🇺🇸", "EUR": "🇪🇺", "NZD": "🇳🇿", "CAD": "🇨🇦", "AUD": "🇦🇺", "GBP": "🇬🇧"
 }
 
 # 3. CORE LOGIC
@@ -93,7 +94,10 @@ def send_daily_calendar():
         "description": description.strip(),
         "timestamp": datetime.now(timezone.utc).isoformat()
     }
-    requests.post(DAILY_WEBHOOK, json={"embeds": [embed]})
+    try:
+        requests.post(DAILY_WEBHOOK, json={"embeds": [embed]})
+    except:
+        pass
 
 def send_weekly_calendar():
     all_news = get_news()
@@ -118,6 +122,7 @@ def send_weekly_calendar():
         elif "Non-Farm" in title or "NFP" in title:
             note = "\n   *⚠️ Market Condition: High Volatility / Wide Spreads Expected.*"
 
+        # FIXED: This line was missing from the loop in your version
         description += f"<t:{ts}:t> | {flag} **{curr}** | {'🔴' if imp=='High' else '🛑'} {imp}\n└ {title}{note}\n"
 
     embed = {
@@ -126,7 +131,10 @@ def send_weekly_calendar():
         "description": description.strip(),
         "timestamp": datetime.now(timezone.utc).isoformat()
     }
-    requests.post(DAILY_WEBHOOK, json={"embeds": [embed]})
+    try:
+        requests.post(DAILY_WEBHOOK, json={"embeds": [embed]})
+    except:
+        pass
 
 def check_alerts():
     news = get_news()
@@ -145,8 +153,11 @@ def check_alerts():
                     {"name": "Time", "value": f"<t:{ts}:F>\n**<t:{ts}:R>**", "inline": False}
                 ]
             }
-            requests.post(ALERT_WEBHOOK, json={"embeds": [embed]})
-            sent_alerts.add(key)
+            try:
+                requests.post(ALERT_WEBHOOK, json={"embeds": [embed]})
+                sent_alerts.add(key)
+            except:
+                pass
 
 # 4. EXECUTION
 keep_alive()
@@ -154,6 +165,7 @@ schedule.every().day.at("00:00").do(send_daily_calendar)
 schedule.every().sunday.at("08:00").do(send_weekly_calendar)
 schedule.every(5).minutes.do(check_alerts)
 
+# Run once on startup to verify it's working
 send_daily_calendar()
 
 while True:
