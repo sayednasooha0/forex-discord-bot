@@ -1,68 +1,44 @@
 import requests
-import schedule
 import time
-from datetime import datetime, timezone
 from flask import Flask
 from threading import Thread
 
+# 1. SIMPLEST WEB SERVER
 app = Flask(__name__)
-
 @app.route('/')
-def home():
-    return "Forex Bot is Operational"
+def home(): return "Test Server Live"
 
-def run():
-    app.run(host='0.0.0.0', port=8080)
+def run(): app.run(host='0.0.0.0', port=8080)
 
-def keep_alive():
-    t = Thread(target=run)
-    t.start()
-
-DAILY_WEBHOOK = "https://discord.com/api/webhooks/1491002012119076985/-SpK7iShVnetlkjZXCfrg3gpRDnNvZqlJhy8lf7CWk0SL_HRCsl389QK0ESjiPNK1cCm"
-
-TARGET_CURRENCIES = ["EUR", "USD", "NZD", "CAD", "AUD", "GBP"]
-FLAGS = {"USD": "🇺🇸", "EUR": "🇪🇺", "NZD": "🇳🇿", "CAD": "🇨🇦", "AUD": "🇦🇺", "GBP": "🇬🇧"}
-
-def get_news():
-    url = "https://nfs.faireconomy.media/ff_calendar_thisweek.json"
-    try:
-        response = requests.get(url, headers={"User-Agent": "Mozilla/5.0"})
-        data = response.json()
-        news_list = []
-        for item in data:
-            if item.get("country") in TARGET_CURRENCIES and item.get("impact") in ["High", "Medium"]:
-                dt = datetime.fromisoformat(item.get("date", "").replace('Z', '+00:00'))
-                news_list.append((int(dt.timestamp()), item.get("country"), item.get("title"), item.get("impact")))
-        return news_list
-    except:
-        return []
-
-def force_test_post():
-    all_news = get_news()
-    if not all_news:
-        print("No news found to post.")
-        return
-
-    # This pulls EVERY news item from the whole week to force a message
-    description = "🚀 **FORCE TEST: ALL WEEKLY NEWS**\n\n"
-    for n in all_news[:15]: # Show first 15 items
-        ts, curr, title, imp = n
-        flag = FLAGS.get(curr, "🏳️")
-        icon = "🔴" if imp == "High" else "🟠"
-        description += f"<t:{ts}:d> | {flag} **{curr}** | {icon}\n└ {title}\n\n"
-
-    embed = {
-        "title": "✅ CONNECTION VERIFIED: LIVE FEED ACTIVE",
-        "color": 65280, # Green
-        "description": description.strip(),
-        "footer": {"text": "Render Cloud Deployment Successful"}
+# 2. THE TEST FUNCTION
+def send_test():
+    # YOUR WEBHOOK
+    url = "https://discord.com/api/webhooks/1491002012119076985/-SpK7iShVnetlkjZXCfrg3gpRDnNvZqlJhy8lf7CWk0SL_HRCsl389QK0ESjiPNK1cCm"
+    
+    payload = {
+        "content": "🚀 **RENDER IS TALKING TO DISCORD!**",
+        "embeds": [{
+            "title": "✅ Connection Success",
+            "description": "If you see this, your bot is officially online and the Webhook is working perfectly.",
+            "color": 65280
+        }]
     }
-    requests.post(DAILY_WEBHOOK, json={"embeds": [embed]})
-    print("Force Test message sent to Discord!")
+    
+    try:
+        print("Attempting to send Discord message...")
+        r = requests.post(url, json=payload)
+        print(f"Response Code: {r.status_code}")
+        if r.status_code == 204 or r.status_code == 200:
+            print("SUCCESS: Check your Discord channel!")
+        else:
+            print(f"FAILED: Discord rejected the message. Code: {r.status_code}")
+    except Exception as e:
+        print(f"CRITICAL ERROR: {e}")
 
-# EXECUTION
-keep_alive()
-force_test_post() # Runs immediately on startup!
+# 3. STARTUP
+Thread(target=run).start()
+time.sleep(2) # Wait for server to breath
+send_test()
 
 while True:
     time.sleep(60)
