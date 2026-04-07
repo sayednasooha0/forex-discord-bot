@@ -1,43 +1,21 @@
 import requests
 import sys
-import time
-from flask import Flask
-from threading import Thread
 
-def log(msg):
-    print(f"DEBUG: {msg}", flush=True)
+# 1. YOUR WEBHOOK URL
+url = "https://discord.com/api/webhooks/1491002012119076985/-SpK7iShVnetlkjZXCfrg3gpRDnNvZqlJhy8lf7CWk0SL_HRCsl389QK0ESjiPNK1cCm"
 
-app = Flask(__name__)
-@app.route('/')
-def home(): return "Bot Active"
+print("--- STEP 1: ATTEMPTING DISCORD CONNECTION ---", flush=True)
 
-def send_final_test():
-    # PASTE YOUR BRAND NEW WEBHOOK URL HERE
-    url = "https://discord.com/api/webhooks/1491002012119076985/-SpK7iShVnetlkjZXCfrg3gpRDnNvZqlJhy8lf7CWk0SL_HRCsl389QK0ESjiPNK1cCm"
+try:
+    # 2. SEND A PLAIN TEXT MESSAGE (NO EMBEDS)
+    payload = {"content": "Hello from Render! Connection is working."}
+    r = requests.post(url, json=payload, timeout=10)
     
-    # Adding a Header makes Discord think we are a real browser
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-        "Content-Type": "application/json"
-    }
-    
-    payload = {"content": "📢 **FINAL CONNECTION TEST: SUCCESS**"}
-    
-    try:
-        log("Sending Request...")
-        r = requests.post(url, json=payload, headers=headers, timeout=15)
-        log(f"Status: {r.status_code}")
-        log(f"Discord Response: {r.text}")
-    except Exception as e:
-        log(f"Connection Error: {e}")
+    print(f"--- STEP 2: STATUS CODE: {r.status_code} ---", flush=True)
+    print(f"--- STEP 3: DISCORD SAYS: {r.text} ---", flush=True)
 
-# Startup
-log("--- STARTING FINAL ATTEMPT ---")
-Thread(target=lambda: app.run(host='0.0.0.0', port=8080)).start()
+except Exception as e:
+    print(f"--- STEP 2: CONNECTION FAILED: {e} ---", flush=True)
 
-time.sleep(5)
-send_final_test()
-log("--- BOOT FINISHED ---")
-
-while True:
-    time.sleep(60)
+# 3. STOP THE SCRIPT SO RENDER LOGS IT
+sys.exit(0)
