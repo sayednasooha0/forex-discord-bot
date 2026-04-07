@@ -23,7 +23,7 @@ def keep_alive():
 DAILY_WEBHOOK = "https://discord.com/api/webhooks/1491002012119076985/-SpK7iShVnetlkjZXCfrg3gpRDnNvZqlJhy8lf7CWk0SL_HRCsl389QK0ESjiPNK1cCm"
 ALERT_WEBHOOK = "https://discord.com/api/webhooks/1491010195801899129/0RTe-_si-spHQtope5NMRUDqq5r7-7ViD-I4HVrZRNxzVsF0B5uTsLbNy6WiPftfv6yD"
 
-TARGET_CURRENCIES = ["EUR", "USD", "NZD"]
+TARGET_CURRENCIES = ["EUR", "USD", "NZD","GBP"]
 CACHE_DURATION = 240
 sent_alerts = set()
 cached_news_data = []
